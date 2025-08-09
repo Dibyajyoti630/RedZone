@@ -3,6 +3,8 @@ import HomeIcon from './icons/HomeIcon.jsx'
 import FeaturesIcon from './icons/FeaturesIcon.jsx'
 import AboutIcon from './icons/AboutIcon.jsx'
 
+import { Link } from 'react-router-dom'
+
 export default function NavBar() {
   return (
     <header className="navbar">
@@ -28,8 +30,8 @@ export default function NavBar() {
         </nav>
 
         <div className="nav-right">
-          <a href="#login" className="btn btn-ghost">Login</a>
-          <a href="#signup" className="btn btn-primary">Sign Up</a>
+          <Link to="/login" className="btn btn-ghost">Login</Link>
+          <Link to="/signup" className="btn btn-primary">Sign Up</Link>
         </div>
       </div>
     </header>

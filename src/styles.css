@@ -52,6 +52,13 @@ body {
   box-shadow: 0 8px 18px rgba(239, 68, 68, 0.25);
 }
 .btn-primary:hover { background: var(--red-600); transform: translateY(-1px); }
+/* Auth pages */
+.auth { padding: 72px 0; display: grid; place-items: center; }
+.auth-card { width: min(440px, 92%); background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+.form { display: grid; gap: 12px; margin-top: 12px; }
+.form label { display: grid; gap: 6px; color: var(--text-600); }
+.form input { background: #0e0e10; color: #fff; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 12px; outline: none; }
+.form input:focus { border-color: var(--red-500); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
 
 .btn-ghost {
   background: rgba(255,255,255,0.02);

@@ -25,9 +25,9 @@ export default function Footer() {
           <div>
             <h4>Contact</h4>
             <ul>
-              <li><a href="mailto:hello@redzone.app">hello@redzone.app</a></li>
-              <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
-              <li>123 Safety Ave, Suite 100</li>
+              <li><a href="dibyajyotinayak063.gmail.com">dibyajyotinayak063.gmail.com</a></li>
+              <li><a href="tel:+917328012952">+91 7328012952</a></li>
+              <li>GIET University, Gunupur</li>
             </ul>
           </div>
           <div>

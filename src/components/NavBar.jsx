@@ -2,10 +2,11 @@ import ShieldIcon from './icons/ShieldIcon.jsx'
 import HomeIcon from './icons/HomeIcon.jsx'
 import FeaturesIcon from './icons/FeaturesIcon.jsx'
 import AboutIcon from './icons/AboutIcon.jsx'
+import AdminIcon from './icons/AdminIcon.jsx'
 
 import { Link } from 'react-router-dom'
 
-export default function NavBar() {
+export default function NavBar({ isAuthenticated = false, isAdmin = false, onLogout }) {
   return (
     <header className="navbar">
       <div className="container nav-content">
@@ -27,11 +28,25 @@ export default function NavBar() {
           <a href="#home"><HomeIcon /> <span>Home</span></a>
           <a href="#features"><FeaturesIcon /> <span>Features</span></a>
           <a href="#about"><AboutIcon /> <span>About</span></a>
+          {isAdmin && (
+            <Link to="/admin"><AdminIcon /> <span>Admin</span></Link>
+          )}
         </nav>
 
         <div className="nav-right">
-          <Link to="/login" className="btn btn-ghost">Login</Link>
-          <Link to="/signup" className="btn btn-primary">Sign Up</Link>
+          {isAuthenticated ? (
+            <>
+              <span className="user-status">
+                {isAdmin ? 'Admin' : 'User'} Logged In
+              </span>
+              <button onClick={onLogout} className="btn btn-ghost">Logout</button>
+            </>
+          ) : (
+            <>
+              <Link to="/login" className="btn btn-ghost">Login</Link>
+              <Link to="/signup" className="btn btn-primary">Sign Up</Link>
+            </>
+          )}
         </div>
       </div>
     </header>

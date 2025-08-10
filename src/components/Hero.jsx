@@ -1,4 +1,5 @@
 import ShieldIcon from './icons/ShieldIcon.jsx'
+import { Link } from 'react-router-dom'
 
 export default function Hero() {
   return (
@@ -32,7 +33,7 @@ export default function Hero() {
         </div>
 
         <div className="hero-actions center">
-          <a href="#start" className="btn btn-primary btn-glow">Start Protection</a>
+          <Link to="/login" className="btn btn-primary btn-glow">Start Protection</Link>
         </div>
       </div>
     </section>

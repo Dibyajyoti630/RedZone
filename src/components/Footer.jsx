@@ -1,4 +1,5 @@
 import ShieldIcon from './icons/ShieldIcon.jsx'
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   return (
@@ -19,7 +20,7 @@ export default function Footer() {
               <li><a href="#home">Home</a></li>
               <li><a href="#features">Features</a></li>
               <li><a href="#about">About</a></li>
-              <li><a href="#login">Login</a></li>
+              <li><Link to="/login">Login</Link></li>
             </ul>
           </div>
           <div>

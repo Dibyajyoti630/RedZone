@@ -143,6 +143,11 @@ body {
 .pulse-marker.danger { background: #dc2626; box-shadow: 0 0 0 6px rgba(220,38,38,0.22); }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.35); } 70% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Features */
 .features { padding: 56px 0; }
 .features h2 { font-size: clamp(1.6rem, 3.2vw, 2rem); margin: 0 0 6px; }

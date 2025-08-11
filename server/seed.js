@@ -8,10 +8,10 @@ dotenv.config()
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/redzoneadmin')
   .then(() => {
-    console.log('✅ Connected to MongoDB for seeding - Database: redzoneadmin')
+    console.log('Connected to MongoDB for seeding - Database: redzoneadmin')
   })
   .catch((error) => {
-    console.error('❌ MongoDB connection error:', error)
+    console.error(' MongoDB connection error:', error)
     process.exit(1)
   })
 
@@ -36,27 +36,27 @@ const demoUsers = [
 // Seed function
 const seedDatabase = async () => {
   try {
-    console.log('🌱 Starting database seeding...')
-    console.log('🗄️  Database: redzoneadmin')
+    console.log('Starting database seeding...')
+    console.log(' Database: redzoneadmin')
 
     // Clear existing users
     await User.deleteMany({})
-    console.log('🗑️  Cleared existing users')
+    console.log('Cleared existing users')
 
     // Create demo users
     for (const userData of demoUsers) {
       const user = new User(userData)
       await user.save()
-      console.log(`✅ Created user: ${userData.email} (${userData.role})`)
+      console.log(`Created user: ${userData.email} (${userData.role})`)
     }
 
-    console.log('🎉 Database seeding completed successfully!')
-    console.log('\n📋 Demo Accounts:')
-    console.log('Admin: admin@redzone.com / admin123')
-    console.log('User: user@redzone.com / user123')
+    console.log(' Database seeding completed successfully!')
+    // console.log('\n Demo Accounts:')
+    // console.log('Admin: admin@redzone.com / admin123')
+    // console.log('User: user@redzone.com / user123')
 
   } catch (error) {
-    console.error('❌ Seeding error:', error)
+    console.error(' Seeding error:', error)
   } finally {
     // Close database connection
     await mongoose.connection.close()

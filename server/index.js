@@ -22,13 +22,13 @@ app.use(express.urlencoded({ extended: true }))
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/redzoneadmin')
-    console.log('✅ Connected to MongoDB - Database: redzoneadmin')
-    console.log('🔗 To connect with mongosh: mongosh redzoneadmin')
+    console.log('[SUCCESS] Connected to MongoDB - Database: redzoneadmin')
+    console.log('[INFO] To connect with mongosh: mongosh redzoneadmin')
     
     // Check if database is empty and create demo users
     const userCount = await User.countDocuments()
     if (userCount === 0) {
-      console.log('🌱 Database is empty, creating demo users...')
+      console.log('[INFO] Database is empty, creating demo users...')
       
       const demoUsers = [
         {
@@ -50,24 +50,24 @@ const connectDB = async () => {
       for (const userData of demoUsers) {
         const user = new User(userData)
         await user.save()
-        console.log(`✅ Created user: ${userData.email} (${userData.role})`)
+        console.log(`[SUCCESS] Created user: ${userData.email} (${userData.role})`)
       }
       
-      console.log('🎉 Demo users created successfully!')
-      console.log('📋 Login with:')
-      console.log('   Admin: admin@redzone.com / admin123')
-      console.log('   User: user@redzone.com / user123')
+      // console.log('[SUCCESS] Demo users created successfully!')
+      // console.log('[INFO] Login with:')
+      // console.log('   Admin: admin@redzone.com / admin123')
+      // console.log('   User: user@redzone.com / user123')
     } else {
-      console.log(`📊 Database has ${userCount} existing users`)
+      console.log(`[INFO] Database has ${userCount} existing users`)
     }
     
-    console.log('\n📖 To view data with mongosh:')
+    console.log('\n[INFO] To view data with mongosh:')
     console.log('   mongosh redzoneadmin')
     console.log('   db.users.find().pretty()')
     
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error)
-    console.log('\n💡 Make sure MongoDB is running:')
+    console.error('[ERROR] MongoDB connection error:', error)
+    console.log('\n[INFO] Make sure MongoDB is running:')
     console.log('   mongod')
     process.exit(1)
   }
@@ -107,8 +107,8 @@ app.use('*', (req, res) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log(`📊 Health check: http://localhost:${PORT}/api/health`)
-  console.log(`🗄️  Database: redzoneadmin`)
-  console.log(`🔗 Connect with: mongosh redzoneadmin`)
+  console.log(`[SUCCESS] Server running on port ${PORT}`)
+  console.log(`[INFO] Health check: http://localhost:${PORT}/api/health`)
+  console.log(`[INFO] Database: redzoneadmin`)
+  console.log(`[INFO] Connect with: mongosh redzoneadmin`)
 })

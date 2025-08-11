@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminIcon from '../components/icons/AdminIcon.jsx'
 import DashboardIcon from '../components/icons/DashboardIcon.jsx'
@@ -8,6 +8,14 @@ import ShieldIcon from '../components/icons/ShieldIcon.jsx'
 
 export default function Admin({ onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [stats, setStats] = useState([
+    { title: 'Total Users', value: 'Loading...', change: '0%', color: 'blue' },
+    { title: 'Active Users', value: 'Loading...', change: '0%', color: 'green' },
+    { title: 'Admin Users', value: 'Loading...', change: '0%', color: 'red' },
+    { title: 'Recent Users (7d)', value: 'Loading...', change: '0%', color: 'purple' }
+  ])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -15,12 +23,58 @@ export default function Admin({ onLogout }) {
     navigate('/')
   }
 
-  const stats = [
-    { title: 'Total Users', value: '1,234', change: '+12%', color: 'blue' },
-    { title: 'Active Sessions', value: '567', change: '+8%', color: 'green' },
-    { title: 'Alerts Today', value: '23', change: '-5%', color: 'red' },
-    { title: 'System Status', value: 'Healthy', change: '100%', color: 'purple' }
-  ]
+  // Fetch admin statistics from API
+  const fetchStats = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch('http://localhost:5000/api/admin/stats', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      // Update stats with real data from database
+      setStats([
+        { title: 'Total Users', value: data.stats.totalUsers.toString(), change: 'Live', color: 'blue' },
+        { title: 'Active Users', value: data.stats.activeUsers.toString(), change: 'Live', color: 'green' },
+        { title: 'Admin Users', value: data.stats.adminUsers.toString(), change: 'Live', color: 'red' },
+        { title: 'Recent Users (7d)', value: data.stats.recentUsers.toString(), change: 'Live', color: 'purple' }
+      ])
+      
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching stats:', err)
+      setError('Failed to load statistics')
+      // Set fallback values
+      setStats([
+        { title: 'Total Users', value: 'Error', change: '0%', color: 'blue' },
+        { title: 'Active Users', value: 'Error', change: '0%', color: 'green' },
+        { title: 'Admin Users', value: 'Error', change: '0%', color: 'red' },
+        { title: 'Recent Users (7d)', value: 'Error', change: '0%', color: 'purple' }
+      ])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchStats()
+  }, [])
 
   const recentActivity = [
     { action: 'New user registered', time: '2 minutes ago', type: 'user' },
@@ -38,9 +92,17 @@ export default function Admin({ onLogout }) {
           <h1>Admin Dashboard</h1>
         </div>
         <div className="admin-header-right">
+          <button 
+            className="btn btn-secondary" 
+            onClick={fetchStats}
+            disabled={loading}
+            style={{ opacity: loading ? 0.6 : 1 }}
+          >
+            <span style={{ fontSize: '14px' }}>🔄</span>
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
           <button className="btn btn-secondary">
             <BellIcon />
-            <span className="notification-badge">3</span>
           </button>
           <button className="btn btn-primary">Settings</button>
           <button onClick={handleLogout} className="btn btn-ghost">Logout</button>
@@ -84,16 +146,45 @@ export default function Admin({ onLogout }) {
         {activeTab === 'dashboard' && (
           <div className="dashboard-content">
             {/* Stats Cards */}
+            {error && (
+              <div className="error-message" style={{ 
+                background: '#fee', 
+                color: '#c33', 
+                padding: '1rem', 
+                borderRadius: '8px', 
+                marginBottom: '1rem',
+                border: '1px solid #fcc'
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
+            
             <div className="stats-grid">
               {stats.map((stat, index) => (
                 <div key={index} className={`stat-card stat-${stat.color}`}>
                   <div className="stat-header">
                     <h3>{stat.title}</h3>
-                    <span className={`stat-change ${stat.change.startsWith('+') ? 'positive' : 'negative'}`}>
-                      {stat.change}
+                    <span className={`stat-change ${stat.change === 'Live' ? 'positive' : stat.change.startsWith('+') ? 'positive' : 'negative'}`}>
+                      {loading ? 'Loading...' : stat.change}
                     </span>
                   </div>
-                  <div className="stat-value">{stat.value}</div>
+                  <div className="stat-value">
+                    {loading ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div className="loading-spinner" style={{
+                          width: '16px',
+                          height: '16px',
+                          border: '2px solid #f3f3f3',
+                          borderTop: '2px solid #3498db',
+                          borderRadius: '50%',
+                          animation: 'spin 1s linear infinite'
+                        }}></div>
+                        Loading...
+                      </div>
+                    ) : (
+                      stat.value
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

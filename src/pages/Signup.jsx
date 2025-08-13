@@ -54,13 +54,17 @@ export default function Signup({ onLogin }) {
       // Registration successful
       console.log('User registered successfully:', data)
       
+      // Store token in localStorage for persistence
+      localStorage.setItem('token', data.token)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      
       // Automatically log in the user after successful registration
       if (onLogin) {
         onLogin(data.user)
       }
 
-      // Redirect to home page
-      navigate('/')
+      // Redirect to dashboard
+      navigate('/dashboard')
 
     } catch (error) {
       console.error('Registration error:', error)

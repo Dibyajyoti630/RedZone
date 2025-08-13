@@ -7,8 +7,11 @@ import Footer from './components/Footer.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Admin from './pages/Admin.jsx'
+import UserDashboard from './pages/UserDashboard.jsx'
+import Map from './pages/Map.jsx'
+import NotFound from './pages/NotFound.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
 
 function Home() {
   return (
@@ -107,8 +110,42 @@ function AppContent() {
       <main>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="/signup" element={<Signup onLogin={handleLogin} />} />
+          <Route 
+            path="/login" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Login onLogin={handleLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/signup" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <Signup onLogin={handleLogin} />
+              )
+            } 
+          />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <UserDashboard user={user} onLogout={handleLogout} />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/map" 
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <Map />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/admin" 
             element={
@@ -117,6 +154,7 @@ function AppContent() {
               </ProtectedRoute>
             } 
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </div>

@@ -1,0 +1,191 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+
+function UserDashboard({ user, onLogout }) {
+  const [recentRedZones, setRecentRedZones] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    fetchRecentRedZones()
+  }, [])
+
+  const fetchRecentRedZones = async () => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch('http://localhost:5000/api/redzones/recent', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        setRecentRedZones(data.redZones)
+      } else {
+        setError('Failed to load recent RedZones')
+      }
+    } catch (error) {
+      console.error('Error fetching recent RedZones:', error)
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddRedZone = () => {
+    // This will be implemented later - for now just show an alert
+    alert('Add New RedZone functionality will be implemented soon!')
+  }
+
+  const handleNotifyMe = () => {
+    // This will be implemented later - for now just show an alert
+    alert('Notification settings will be implemented soon!')
+  }
+
+  return (
+    <div className="dashboard-container">
+      {/* Dashboard Header */}
+      <div className="dashboard-header">
+        <div className="dashboard-header-left">
+          <h1>Welcome back, {user?.name || 'User'}!</h1>
+          <p>Manage your RedZone alerts and stay informed about safety in your area.</p>
+        </div>
+        <div className="dashboard-header-right">
+          <div className="user-info">
+            <span className="user-avatar">
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </span>
+            <div className="user-details">
+              <span className="user-name">{user?.name || 'User'}</span>
+              <span className="user-email">{user?.email}</span>
+            </div>
+          </div>
+          <button onClick={onLogout} className="btn btn-ghost">
+            Logout
+          </button>
+        </div>
+      </div>
+
+      {/* Action Cards */}
+      <div className="dashboard-cards">
+        <div className="action-card">
+          <div className="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h3>MAP</h3>
+          <p>View RedZones on an interactive map</p>
+          <Link to="/map" className="btn btn-primary">
+            View Map
+          </Link>
+        </div>
+
+        <div className="action-card">
+          <div className="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
+              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+            </svg>
+          </div>
+          <h3>NOTIFY ME</h3>
+          <p>Configure your notification preferences</p>
+          <button onClick={handleNotifyMe} className="btn btn-primary">
+            Settings
+          </button>
+        </div>
+
+        <div className="action-card">
+          <div className="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 12h8"/>
+              <path d="M12 8v8"/>
+            </svg>
+          </div>
+          <h3>ADD NEW REDZONE</h3>
+          <p>Report a new dangerous area</p>
+          <button onClick={handleAddRedZone} className="btn btn-primary">
+            Report
+          </button>
+        </div>
+      </div>
+
+      {/* Recent RedZones Section */}
+      <div className="recent-redzones">
+        <div className="section-header">
+          <h2>Recent RedZones</h2>
+          <p>Recently approved dangerous areas in your vicinity</p>
+        </div>
+
+        {error ? (
+          <div className="error-state">
+            <div className="error-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="15" y1="9" x2="9" y2="15"/>
+                <line x1="9" y1="9" x2="15" y2="15"/>
+              </svg>
+            </div>
+            <h3>Error Loading RedZones</h3>
+            <p>{error}</p>
+            <button onClick={fetchRecentRedZones} className="btn btn-secondary">
+              Try Again
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="loading-state">
+            <div className="loading-spinner"></div>
+            <p>Loading recent RedZones...</p>
+          </div>
+        ) : recentRedZones.length > 0 ? (
+          <div className="redzone-list">
+            {recentRedZones.map((redZone) => (
+              <div key={redZone._id} className="redzone-item">
+                <div className="redzone-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div className="redzone-content">
+                  <h4>{redZone.title}</h4>
+                  <p>{redZone.description}</p>
+                  <div className="redzone-meta">
+                    <span className="location">{redZone.location}</span>
+                    <span className="date">{new Date(redZone.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                <div className="redzone-severity">
+                  <span className={`severity-badge ${redZone.severity}`}>
+                    {redZone.severity}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state">
+            <div className="empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+            </div>
+            <h3>No RedZones Found</h3>
+            <p>There are no recent RedZones in your area. Stay safe!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default UserDashboard

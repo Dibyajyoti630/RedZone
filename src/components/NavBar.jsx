@@ -1,8 +1,6 @@
 import ShieldIcon from './icons/ShieldIcon.jsx'
-import HomeIcon from './icons/HomeIcon.jsx'
-import FeaturesIcon from './icons/FeaturesIcon.jsx'
-import AboutIcon from './icons/AboutIcon.jsx'
 import AdminIcon from './icons/AdminIcon.jsx'
+import DashboardIcon from './icons/DashboardIcon.jsx'
 
 import { Link } from 'react-router-dom'
 
@@ -25,9 +23,9 @@ export default function NavBar({ isAuthenticated = false, isAdmin = false, onLog
         </label>
 
         <nav id="nav-menu" className="nav-links nav-center">
-          <a href="#home"><HomeIcon /> <span>Home</span></a>
-          <a href="#features"><FeaturesIcon /> <span>Features</span></a>
-          <a href="#about"><AboutIcon /> <span>About</span></a>
+          {isAuthenticated && (
+            <Link to="/dashboard"><DashboardIcon /> <span>Dashboard</span></Link>
+          )}
           {isAdmin && (
             <Link to="/admin"><AdminIcon /> <span>Admin</span></Link>
           )}

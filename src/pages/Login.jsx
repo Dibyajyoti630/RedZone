@@ -60,7 +60,7 @@ export default function Login({ onLogin }) {
       if (data.user.role === 'admin') {
         navigate('/admin')
       } else {
-        navigate('/')
+        navigate('/dashboard')
       }
 
     } catch (error) {

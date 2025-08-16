@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { API_ENDPOINTS } from '../config/api'
 
 export default function Signup({ onLogin }) {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ export default function Signup({ onLogin }) {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/auth/register', {
+      const response = await fetch(API_ENDPOINTS.REGISTER, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

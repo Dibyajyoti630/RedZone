@@ -3,8 +3,26 @@ import AdminIcon from './icons/AdminIcon.jsx'
 import DashboardIcon from './icons/DashboardIcon.jsx'
 
 import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 export default function NavBar({ isAuthenticated = false, isAdmin = false, onLogout }) {
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsSmallScreen(window.innerWidth < 760);
+    };
+    
+    // Initial check
+    checkScreenSize();
+    
+    // Add event listener for window resize
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Cleanup
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
   return (
     <header className="navbar">
       <div className="container nav-content">
@@ -29,6 +47,17 @@ export default function NavBar({ isAuthenticated = false, isAdmin = false, onLog
           {isAdmin && (
             <Link to="/admin"><AdminIcon /> <span>Admin</span></Link>
           )}
+          {isSmallScreen && (
+            <>
+              <Link to="/" className="mobile-auth-link">Home</Link>
+              {!isAuthenticated && (
+                <>
+                  <Link to="/login" className="mobile-auth-link">Login</Link>
+                  <Link to="/signup" className="mobile-auth-link">Sign Up</Link>
+                </>
+              )}
+            </>
+          )}
         </nav>
 
         <div className="nav-right">
@@ -38,7 +67,8 @@ export default function NavBar({ isAuthenticated = false, isAdmin = false, onLog
             </>
           ) : (
             <>
-              <Link to="/signup" className="btn btn-primary">Sign Up</Link>
+              {!isSmallScreen && <Link to="/login" className="btn btn-ghost">Login</Link>}
+              {!isSmallScreen && <Link to="/signup" className="btn btn-primary">Sign Up</Link>}
             </>
           )}
         </div>

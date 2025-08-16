@@ -34,7 +34,7 @@ export default function Admin({ onLogout }) {
         return
       }
 
-      const response = await fetch('http://localhost:5000/api/admin/stats', {
+      const response = await fetch('http://localhost:5001/api/admin/stats', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

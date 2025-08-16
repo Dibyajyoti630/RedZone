@@ -12,6 +12,7 @@ import Map from './pages/Map.jsx'
 import NotFound from './pages/NotFound.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
+import { API_ENDPOINTS, apiCall } from './config/api.js'
 
 function Home() {
   return (
@@ -41,22 +42,10 @@ function AppContent() {
       if (token && savedUser) {
         try {
           // Verify token with backend
-          const response = await fetch('http://localhost:5000/api/auth/me', {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            setUser(data.user)
-            setIsAuthenticated(true)
-            setIsAdmin(data.user.role === 'admin')
-          } else {
-            // Token is invalid, clear storage
-            localStorage.removeItem('token')
-            localStorage.removeItem('user')
-          }
+          const data = await apiCall(API_ENDPOINTS.ME)
+          setUser(data.user)
+          setIsAuthenticated(true)
+          setIsAdmin(data.user.role === 'admin')
         } catch (error) {
           console.error('Auth check error:', error)
           localStorage.removeItem('token')

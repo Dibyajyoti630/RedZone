@@ -16,7 +16,7 @@ function UserDashboard({ user, onLogout }) {
     
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5000/api/redzones/recent', {
+      const response = await fetch('http://localhost:5001/api/redzones/recent', {
         headers: {
           'Authorization': `Bearer ${token}`
         }

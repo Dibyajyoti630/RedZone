@@ -170,17 +170,7 @@ export default function Admin({ onLogout }) {
                   </div>
                   <div className="stat-value">
                     {loading ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <div className="loading-spinner" style={{
-                          width: '16px',
-                          height: '16px',
-                          border: '2px solid #f3f3f3',
-                          borderTop: '2px solid #3498db',
-                          borderRadius: '50%',
-                          animation: 'spin 1s linear infinite'
-                        }}></div>
-                        Loading...
-                      </div>
+                      <div>Loading...</div>
                     ) : (
                       stat.value
                     )}

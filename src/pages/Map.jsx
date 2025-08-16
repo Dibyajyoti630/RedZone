@@ -101,6 +101,22 @@ function Map() {
     checkMobile()
   }, [])
 
+  // Handle map loading state
+  useEffect(() => {
+    // Set initial loading state
+    setMapLoading(true);
+    
+    // Create a timeout to ensure map loading state is reset even if map fails to load
+    const loadingTimeout = setTimeout(() => {
+      console.log('Map loading timeout reached, forcing loading state to false');
+      setMapLoading(false);
+    }, 10000); // 10 seconds timeout
+    
+    return () => {
+      clearTimeout(loadingTimeout);
+    };
+  }, []);
+
   // Check mobile geolocation permissions
   const checkMobilePermissions = useCallback(async () => {
     if (!isMobile) return
@@ -538,15 +554,13 @@ function Map() {
     return userLocation ? MAP_CONFIG.userLocationZoom : MAP_CONFIG.defaultZoom
   }, [userLocation])
 
-  // Show initial loading spinner
+  // Show initial loading text
   if (loading) {
     return (
       <div className="map-page">
         <div className="map-container">
           <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p>Loading RedZone Map...</p>
-            <p className="loading-subtitle">Preparing interactive map and data</p>
+            <p>Loading...</p>
           </div>
         </div>
       </div>
@@ -616,10 +630,7 @@ function Map() {
                     disabled={locationLoading}
                   >
                     {locationLoading ? (
-                      <>
-                        <span className="btn-spinner"></span>
-                        {isMobile ? 'Getting GPS Location...' : 'Getting Location...'}
-                      </>
+                      <>Loading...</>
                     ) : (
                       <>
                         📍 {isMobile ? 'Enable Mobile GPS' : 'Enable Location Services'}
@@ -742,10 +753,23 @@ function Map() {
               ) : (
                 <>
                   {mapLoading && (
-                    <div className="map-loading-overlay">
-                      <div className="map-loading-spinner">
-                        <div className="spinner"></div>
-                        <p>Loading Map...</p>
+                    <div className="map-loading-overlay" style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                      zIndex: 1000,
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}>
+                      <div className="map-loading-text" style={{
+                        textAlign: 'center',
+                        padding: '20px'
+                      }}>
+                        <p style={{ fontWeight: 'bold', margin: 0 }}>Loading...</p>
                       </div>
                     </div>
                   )}
@@ -755,15 +779,27 @@ function Map() {
                     style={MAP_CONFIG.mapContainerStyle}
                     {...MAP_CONFIG.leafletOptions}
                     ref={mapRef}
-                    whenCreated={() => setMapLoading(false)}
-                    whenReady={() => setMapLoading(false)}
+                    whenReady={() => {
+                      console.log('Map is ready');
+                      setMapLoading(false);
+                    }}
                   >
                     <TileLayer
                       attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       eventHandlers={{
-                        loading: () => setMapLoading(true),
-                        load: () => setMapLoading(false)
+                        loading: () => {
+                          console.log('Tiles loading');
+                          setMapLoading(true);
+                        },
+                        load: () => {
+                          console.log('Tiles loaded');
+                          setMapLoading(false);
+                        },
+                        error: (e) => {
+                          console.error('Tile loading error:', e);
+                          setMapLoading(false);
+                        }
                       }}
                     />
                     

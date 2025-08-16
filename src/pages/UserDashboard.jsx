@@ -140,8 +140,7 @@ function UserDashboard({ user, onLogout }) {
           </div>
         ) : loading ? (
           <div className="loading-state">
-            <div className="loading-spinner"></div>
-            <p>Loading recent RedZones...</p>
+            <p>Loading...</p>
           </div>
         ) : recentRedZones.length > 0 ? (
           <div className="redzone-list">

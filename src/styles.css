@@ -143,10 +143,7 @@ body {
 .pulse-marker.danger { background: #dc2626; box-shadow: 0 0 0 6px rgba(220,38,38,0.22); }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.35); } 70% { box-shadow: 0 0 0 18px rgba(239,68,68,0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); } }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+
 
 /* Features */
 .features { padding: 56px 0; }
@@ -857,12 +854,9 @@ body {
 }
 
 .loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid rgba(239,68,68,0.1);
-  border-top: 3px solid var(--red-500);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .redzone-list {
@@ -1542,15 +1536,7 @@ body {
   color: var(--text-600);
 }
 
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-top: 3px solid var(--red-500);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
-}
+
 
 .loading-subtitle {
   font-size: 0.9rem;
@@ -1566,16 +1552,7 @@ body {
   opacity: 0.8;
 }
 
-.btn-spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-right: 8px;
-  display: inline-block;
-}
+
 
 /* Map Loading Overlay */
 .map-loading-overlay {
@@ -1592,22 +1569,7 @@ body {
   border-radius: 12px;
 }
 
-.map-loading-spinner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-}
 
-.map-loading-spinner .spinner {
-  width: 32px;
-  height: 32px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top: 2px solid white;
-  margin-bottom: 12px;
-}
 
 .map-loading-spinner p {
   margin: 0;
@@ -1615,10 +1577,7 @@ body {
   font-weight: 500;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+
 
 /* Responsive Map */
 @media (max-width: 1200px) {

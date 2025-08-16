@@ -34,14 +34,10 @@ export default function NavBar({ isAuthenticated = false, isAdmin = false, onLog
         <div className="nav-right">
           {isAuthenticated ? (
             <>
-              <span className="user-status">
-                {isAdmin ? 'Admin' : 'User'} Logged In
-              </span>
               <button onClick={onLogout} className="btn btn-ghost">Logout</button>
             </>
           ) : (
             <>
-              <Link to="/login" className="btn btn-ghost">Login</Link>
               <Link to="/signup" className="btn btn-primary">Sign Up</Link>
             </>
           )}

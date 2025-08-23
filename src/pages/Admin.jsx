@@ -5,6 +5,7 @@ import DashboardIcon from '../components/icons/DashboardIcon.jsx'
 import HistoryIcon from '../components/icons/HistoryIcon.jsx'
 import BellIcon from '../components/icons/BellIcon.jsx'
 import ShieldIcon from '../components/icons/ShieldIcon.jsx'
+import { API_ENDPOINTS } from '../config/api.js'
 
 export default function Admin({ onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -34,7 +35,8 @@ export default function Admin({ onLogout }) {
         return
       }
 
-      const response = await fetch('http://localhost:5001/api/admin/stats', {
+      console.log('Fetching stats from:', API_ENDPOINTS.ADMIN_STATS);
+      const response = await fetch(API_ENDPOINTS.ADMIN_STATS, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -42,11 +44,14 @@ export default function Admin({ onLogout }) {
         }
       })
 
+      console.log('Response status:', response.status);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
       }
 
       const data = await response.json()
+      console.log('Received data:', data);
       
       // Update stats with real data from database
       setStats([
@@ -58,8 +63,8 @@ export default function Admin({ onLogout }) {
       
       setError(null)
     } catch (err) {
-      console.error('Error fetching stats:', err)
-      setError('Failed to load statistics')
+      console.error('Error fetching stats:', err.message || err)
+      setError(`Failed to load statistics: ${err.message || 'Unknown error'}`)
       // Set fallback values
       setStats([
         { title: 'Total Users', value: 'Error', change: '0%', color: 'blue' },

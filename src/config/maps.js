@@ -4,8 +4,8 @@
 
 export const MAP_CONFIG = {
   defaultCenter: {
-    lat: 19.0769,  // User's specific latitude
-    lng: 83.7603   // User's specific longitude
+    lat: 19.0755,  // User's specific latitude
+    lng: 83.8128   // User's specific longitude
   },
   defaultZoom: 12,
   userLocationZoom: 15,

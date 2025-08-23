@@ -1,6 +1,7 @@
 import express from 'express'
 import auth from '../middleware/auth.js'
 import User from '../models/User.js'
+import RedZone from '../models/RedZone.js'
 
 const router = express.Router()
 
@@ -56,12 +57,10 @@ const mockRedZones = [
 // GET /api/redzones/recent - Get recent approved RedZones
 router.get('/recent', auth, async (req, res) => {
   try {
-    // In a real application, you would query the database for approved RedZones
-    // For now, we'll return mock data
-    const recentRedZones = mockRedZones
-      .filter(redZone => redZone.status === 'approved')
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 10) // Limit to 10 most recent
+    const recentRedZones = await RedZone.find({ status: 'approved' })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .populate('reportedBy', 'name')
 
     res.json({
       success: true,
@@ -79,7 +78,7 @@ router.get('/recent', auth, async (req, res) => {
 // POST /api/redzones - Create a new RedZone report
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, location, severity } = req.body
+    const { title, description, location, landmark, severity, coordinates, status } = req.body
 
     // Validate required fields
     if (!title || !description || !location || !severity) {
@@ -98,22 +97,34 @@ router.post('/', auth, async (req, res) => {
       })
     }
 
-    // In a real application, you would save this to a database
-    // For now, we'll just return a success response
-    const newRedZone = {
-      _id: Date.now().toString(),
+    // Create new RedZone document
+    const newRedZone = new RedZone({
       title,
       description,
       location,
+      landmark,
+      coordinates,
       severity,
-      createdAt: new Date(),
-      status: 'pending', // New reports start as pending
       reportedBy: req.user.id
+    })
+
+    // If the user is an admin and status is provided as 'approved', set it directly
+    if (req.user.role === 'admin' && status === 'approved') {
+      newRedZone.status = 'approved'
+      newRedZone.reviewedBy = req.user.id
+      newRedZone.reviewedAt = Date.now()
     }
+
+    // Save to database
+    await newRedZone.save()
+
+    const message = newRedZone.status === 'approved' 
+      ? 'RedZone created and approved successfully.'
+      : 'RedZone report submitted successfully. It will be reviewed by an admin.'
 
     res.status(201).json({
       success: true,
-      message: 'RedZone report submitted successfully. It will be reviewed by an admin.',
+      message,
       redZone: newRedZone
     })
   } catch (error) {
@@ -136,11 +147,15 @@ router.get('/', auth, async (req, res) => {
       })
     }
 
-    // In a real application, you would query the database
-    // For now, we'll return mock data
+    // Query the database for all RedZones
+    const redZones = await RedZone.find()
+      .sort({ createdAt: -1 })
+      .populate('reportedBy', 'name')
+      .populate('reviewedBy', 'name')
+    
     res.json({
       success: true,
-      redZones: mockRedZones
+      redZones
     })
   } catch (error) {
     console.error('Error fetching RedZones:', error)
@@ -151,6 +166,7 @@ router.get('/', auth, async (req, res) => {
   }
 })
 
+// REMOVE THIS PLACEHOLDER IMPLEMENTATION
 // PUT /api/redzones/:id/approve - Approve a RedZone (admin only)
 router.put('/:id/approve', auth, async (req, res) => {
   try {
@@ -164,11 +180,28 @@ router.put('/:id/approve', auth, async (req, res) => {
 
     const { id } = req.params
 
-    // In a real application, you would update the database
-    // For now, we'll just return a success response
+    // Find the RedZone by ID and update its status to 'approved'
+    const redZone = await RedZone.findById(id)
+    
+    if (!redZone) {
+      return res.status(404).json({
+        success: false,
+        message: 'RedZone not found'
+      })
+    }
+    
+    // Update the RedZone status and add reviewer information
+    redZone.status = 'approved'
+    redZone.reviewedBy = req.user.id
+    redZone.reviewedAt = new Date()
+    redZone.updatedAt = new Date()
+    
+    await redZone.save()
+    
     res.json({
       success: true,
-      message: 'RedZone approved successfully'
+      message: 'RedZone approved successfully',
+      redZone
     })
   } catch (error) {
     console.error('Error approving RedZone:', error)
@@ -192,17 +225,146 @@ router.put('/:id/reject', auth, async (req, res) => {
 
     const { id } = req.params
 
-    // In a real application, you would update the database
-    // For now, we'll just return a success response
+    // Find the RedZone by ID and update its status to 'rejected'
+    const redZone = await RedZone.findById(id)
+    
+    if (!redZone) {
+      return res.status(404).json({
+        success: false,
+        message: 'RedZone not found'
+      })
+    }
+    
+    // Update the RedZone status and add reviewer information
+    redZone.status = 'rejected'
+    redZone.reviewedBy = req.user.id
+    redZone.reviewedAt = new Date()
+    redZone.updatedAt = new Date()
+    
+    await redZone.save()
+    
     res.json({
       success: true,
-      message: 'RedZone rejected successfully'
+      message: 'RedZone rejected successfully',
+      redZone
     })
   } catch (error) {
     console.error('Error rejecting RedZone:', error)
     res.status(500).json({
       success: false,
       message: 'Failed to reject RedZone'
+    })
+  }
+})
+
+// KEEP THIS ACTUAL IMPLEMENTATION
+// PUT /api/redzones/:id/approve - Approve a RedZone report (admin only)
+router.put('/:id/approve', auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      })
+    }
+
+    const redZone = await RedZone.findById(req.params.id)
+    
+    if (!redZone) {
+      return res.status(404).json({
+        success: false,
+        message: 'RedZone report not found'
+      })
+    }
+
+    // Update status to approved
+    redZone.status = 'approved'
+    redZone.reviewedBy = req.user.id
+    redZone.reviewedAt = Date.now()
+    redZone.updatedAt = Date.now()
+    
+    await redZone.save()
+
+    res.json({
+      success: true,
+      message: 'RedZone report approved successfully',
+      redZone
+    })
+  } catch (error) {
+    console.error('Error approving RedZone:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to approve RedZone report'
+    })
+  }
+})
+
+// PUT /api/redzones/:id/reject - Reject a RedZone report (admin only)
+router.put('/:id/reject', auth, async (req, res) => {
+  try {
+    // Check if user is admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin privileges required.'
+      })
+    }
+
+    const redZone = await RedZone.findById(req.params.id)
+    
+    if (!redZone) {
+      return res.status(404).json({
+        success: false,
+        message: 'RedZone report not found'
+      })
+    }
+
+    // Update status to rejected
+    redZone.status = 'rejected'
+    redZone.reviewedBy = req.user.id
+    redZone.reviewedAt = Date.now()
+    redZone.updatedAt = Date.now()
+    
+    await redZone.save()
+
+    res.json({
+      success: true,
+      message: 'RedZone report rejected successfully',
+      redZone
+    })
+  } catch (error) {
+    console.error('Error rejecting RedZone:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to reject RedZone report'
+    })
+  }
+})
+
+// GET /api/redzones/:id - Get a specific RedZone by ID
+router.get('/:id', auth, async (req, res) => {
+  try {
+    const redZone = await RedZone.findById(req.params.id)
+      .populate('reportedBy', 'name')
+      .populate('reviewedBy', 'name')
+    
+    if (!redZone) {
+      return res.status(404).json({
+        success: false,
+        message: 'RedZone report not found'
+      })
+    }
+
+    res.json({
+      success: true,
+      redZone
+    })
+  } catch (error) {
+    console.error('Error fetching RedZone:', error)
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch RedZone report'
     })
   }
 })

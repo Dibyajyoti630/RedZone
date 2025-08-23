@@ -94,7 +94,7 @@ function Map() {
       const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i
       const isMobileDevice = mobileRegex.test(userAgent.toLowerCase())
       setIsMobile(isMobileDevice)
-      console.log('📱 Device detected:', isMobileDevice ? 'Mobile' : 'Desktop')
+      console.log('Device detected:', isMobileDevice ? 'Mobile' : 'Desktop')
       return isMobileDevice
     }
     
@@ -153,10 +153,10 @@ function Map() {
         // Don't set location yet, let the main enableLocation function handle it
       },
       (error) => {
-        console.log('❌ Mobile permission request failed:', error.code)
+        console.log('Mobile permission request failed:', error.code)
         if (error.code === error.PERMISSION_DENIED) {
           setMobilePermissionStatus('denied')
-          setError('❌ Mobile Location Permission Denied\\n\\n📱 Please follow these steps:\\n\\n1. **Close this browser tab**\\n2. **Go to Phone Settings** → Apps → Browser → Permissions → Location → **Allow**\\n3. **Reopen the website** and try again\\n\\n💡 Alternative: Use the "Manual Location" button below')
+          setError('Mobile Location Permission Denied\\n\\n Please follow these steps:\\n\\n1. **Close this browser tab**\\n2. **Go to Phone Settings** → Apps → Browser → Permissions → Location → **Allow**\\n3. **Reopen the website** and try again\\n\\n💡 Alternative: Use the "Manual Location" button below')
         }
       },
       {
@@ -214,7 +214,7 @@ function Map() {
   // Check browser geolocation support
   const checkGeolocationSupport = useCallback(() => {
     if (!navigator.geolocation) {
-      console.error('❌ Geolocation not supported')
+      console.error(' Geolocation not supported')
       return false
     }
     
@@ -223,7 +223,7 @@ function Map() {
       navigator.permissions.query({ name: 'geolocation' }).then((result) => {
         console.log('🔐 Geolocation permission status:', result.state)
         if (result.state === 'denied') {
-          console.error('❌ Geolocation permission denied')
+          console.error('Geolocation permission denied')
         }
       })
     }
@@ -232,13 +232,13 @@ function Map() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          console.log('✅ GPS test successful:', {
+          console.log(' GPS test successful:', {
             accuracy: position.coords.accuracy,
             timestamp: new Date(position.timestamp).toLocaleString()
           })
         },
         (error) => {
-          console.log('⚠️ GPS test failed:', {
+          console.log(' GPS test failed:', {
             code: error.code,
             message: error.message,
             suggestion: error.code === 2 ? 'Try going outside or enabling GPS on your device' : 'Check browser permissions'

@@ -16,7 +16,7 @@ function UserDashboard({ user, onLogout }) {
     
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5001/api/redzones/recent', {
+      const response = await fetch('http://localhost:5002/api/redzones/recent', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -36,10 +36,7 @@ function UserDashboard({ user, onLogout }) {
     }
   }
 
-  const handleAddRedZone = () => {
-    // This will be implemented later - for now just show an alert
-    alert('Add New RedZone functionality will be implemented soon!')
-  }
+  // No longer needed as we'll use Link component directly
 
   const handleNotifyMe = () => {
     // This will be implemented later - for now just show an alert
@@ -110,9 +107,9 @@ function UserDashboard({ user, onLogout }) {
           </div>
           <h3>ADD NEW REDZONE</h3>
           <p>Report a new dangerous area</p>
-          <button onClick={handleAddRedZone} className="btn btn-primary">
+          <Link to="/report" className="btn btn-primary">
             Report
-          </button>
+          </Link>
         </div>
       </div>
 

@@ -54,10 +54,10 @@ body {
 .btn-primary:hover { background: var(--red-600); transform: translateY(-1px); }
 /* Auth pages */
 .auth { padding: 72px 0; display: grid; place-items: center; }
-.auth-card { width: min(440px, 92%); background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
+.auth-card { width: min(440px, 92%); background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); }
 .form { display: grid; gap: 12px; margin-top: 12px; }
 .form label { display: grid; gap: 6px; color: var(--text-600); }
-.form input { background: #0e0e10; color: #fff; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 12px; outline: none; }
+.form input { background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 12px 12px; outline: none; }
 .form input:focus { border-color: var(--red-500); box-shadow: 0 0 0 3px rgba(239,68,68,0.15); }
 
 .btn-ghost {
@@ -128,7 +128,7 @@ body {
 .hero-actions { display: flex; gap: 12px; align-items: center; }
 
 .hero-media { display: flex; justify-content: center; }
-.map-card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; }
+.map-card { background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; box-shadow: var(--shadow); padding: 12px; }
 .map {
   width: min(520px, 80vw);
   height: 340px;
@@ -416,8 +416,8 @@ body {
 }
 
 .activity-section {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 16px;
   padding: 24px;
   box-shadow: var(--shadow);
@@ -782,8 +782,8 @@ body {
 }
 
 .action-card {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 16px;
   padding: 24px;
   text-align: center;
@@ -1104,8 +1104,8 @@ body {
 }
 
 .map-main {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--shadow);
@@ -1324,8 +1324,8 @@ body {
 .status-card,
 .notifications-card,
 .history-card {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 16px;
   padding: 24px;
   box-shadow: var(--shadow);

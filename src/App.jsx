@@ -9,6 +9,7 @@ import Signup from './pages/Signup.jsx'
 import Admin from './pages/Admin.jsx'
 import UserDashboard from './pages/UserDashboard.jsx'
 import Map from './pages/Map.jsx'
+import ReportRedZone from './pages/ReportRedZone.jsx'
 import NotFound from './pages/NotFound.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom'
@@ -132,6 +133,14 @@ function AppContent() {
             element={
               <ProtectedRoute isAuthenticated={isAuthenticated}>
                 <Map />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/report" 
+            element={
+              <ProtectedRoute isAuthenticated={isAuthenticated}>
+                <ReportRedZone />
               </ProtectedRoute>
             } 
           />

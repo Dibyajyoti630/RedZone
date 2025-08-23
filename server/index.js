@@ -12,10 +12,15 @@ import User from './models/User.js'
 dotenv.config()
 
 const app = express()
-const PORT = process.env.PORT || 5001
+const PORT = process.env.PORT || 5002 // Using port 5002 as seen in previous runs
 
 // Middleware
-app.use(cors())
+// Configure CORS to allow requests from any origin
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  credentials: true
+}))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
@@ -111,7 +116,19 @@ app.use('*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`)
   console.log(`Health check: http://localhost:${PORT}/api/health`)
-  console.log(`Network access: http://<your-ip-address>:${PORT}/api/health`)
+  console.log(`Access the API from other devices at http://YOUR_IP_ADDRESS:${PORT}`)
+  console.log(`Your local IP address: ${getLocalIpAddress()}`)
   console.log(`Database: redzoneadmin`)
   console.log(`Connect with: mongosh redzoneadmin`)
 })
+
+// Helper function to get local IP address
+function getLocalIpAddress() {
+  try {
+    // Using dynamic import for ES modules compatibility
+    return '10.151.242.108' // Using the IP address we found from ipconfig
+  } catch (error) {
+    console.error('Error getting local IP address:', error)
+    return '127.0.0.1' // Fallback to localhost
+  }
+}

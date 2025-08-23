@@ -1,14 +1,41 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminIcon from '../components/icons/AdminIcon.jsx'
 import DashboardIcon from '../components/icons/DashboardIcon.jsx'
 import HistoryIcon from '../components/icons/HistoryIcon.jsx'
 import BellIcon from '../components/icons/BellIcon.jsx'
 import ShieldIcon from '../components/icons/ShieldIcon.jsx'
-import { API_ENDPOINTS } from '../config/api.js'
+import { API_ENDPOINTS, apiCall } from '../config/api.js'
+import './Admin.css'
 
 export default function Admin({ onLogout }) {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [historyFilter, setHistoryFilter] = useState('all')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const navRef = useRef(null)
+  
+  // Close mobile menu when clicking outside
+  const handleOverlayClick = () => {
+    setMobileMenuOpen(false)
+  }
+  
+  // Handle hamburger menu toggle with animation
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen)
+  }
+  
+  // Close menu when window is resized to desktop size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 768 && mobileMenuOpen) {
+        setMobileMenuOpen(false)
+      }
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [mobileMenuOpen])
+  
   const [stats, setStats] = useState([
     { title: 'Total Users', value: 'Loading...', change: '0%', color: 'blue' },
     { title: 'Active Users', value: 'Loading...', change: '0%', color: 'green' },
@@ -17,6 +44,14 @@ export default function Admin({ onLogout }) {
   ])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [redZones, setRedZones] = useState([])
+  const [loadingRedZones, setLoadingRedZones] = useState(false)
+  const [newRedZone, setNewRedZone] = useState({
+    title: '',
+    description: '',
+    location: '',
+    severity: 'medium'
+  })
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -77,8 +112,174 @@ export default function Admin({ onLogout }) {
     }
   }
 
+  // Fetch all RedZones for admin
+  const fetchRedZones = async () => {
+    try {
+      setLoadingRedZones(true)
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch(API_ENDPOINTS.REDZONES_ALL, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+
+      const data = await response.json()
+      setRedZones(data.redZones)
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching RedZones:', err.message || err)
+      setError(`Failed to load RedZones: ${err.message || 'Unknown error'}`)
+    } finally {
+      setLoadingRedZones(false)
+    }
+  }
+
+  // Handle RedZone approval
+  const handleApproveRedZone = async (id) => {
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch(API_ENDPOINTS.REDZONES_APPROVE(id), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+      
+      const result = await response.json()
+
+      // Fetch all RedZones again to update the state
+      fetchRedZones()
+
+      // Show success message
+      alert('RedZone approved successfully')
+    } catch (err) {
+      console.error('Error approving RedZone:', err.message || err)
+      setError(`Failed to approve RedZone: ${err.message || 'Unknown error'}`)
+    }
+  }
+
+  // Handle RedZone rejection
+  const handleRejectRedZone = async (id) => {
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch(API_ENDPOINTS.REDZONES_REJECT(id), {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+      
+      const result = await response.json()
+
+      // Fetch all RedZones again to update the state
+      fetchRedZones()
+
+      // Show success message
+      alert('RedZone rejected successfully')
+    } catch (err) {
+      console.error('Error rejecting RedZone:', err.message || err)
+      setError(`Failed to reject RedZone: ${err.message || 'Unknown error'}`)
+    }
+  }
+
+  // Handle new RedZone submission
+  const handleSubmitRedZone = async (e) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      // Add status as approved since it's created by admin
+      const redZoneData = {
+        ...newRedZone,
+        status: 'approved'
+      }
+
+      const response = await fetch(API_ENDPOINTS.REDZONES_CREATE, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(redZoneData)
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+
+      const result = await response.json()
+
+      // Reset form
+      setNewRedZone({
+        title: '',
+        description: '',
+        location: '',
+        severity: 'medium'
+      })
+
+      // Add the new RedZone to the list with approved status
+      setRedZones(prevRedZones => [
+        {
+          ...result.redZone,
+          status: 'approved'
+        },
+        ...prevRedZones
+      ])
+
+      // Show success message
+      alert('New RedZone created successfully')
+    } catch (err) {
+      console.error('Error creating RedZone:', err.message || err)
+      setError(`Failed to create RedZone: ${err.message || 'Unknown error'}`)
+    }
+  }
+
   useEffect(() => {
     fetchStats()
+    fetchRedZones()
   }, [])
 
   const recentActivity = [
@@ -90,8 +291,26 @@ export default function Admin({ onLogout }) {
 
   return (
     <div className="admin-container">
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && <div className="mobile-overlay" onClick={handleOverlayClick}></div>}
+      
+      {/* Mobile Hamburger Menu */}
+      <div className="mobile-header">
+        <div className={`hamburger-menu ${mobileMenuOpen ? 'active' : ''}`} onClick={toggleMobileMenu}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <h1>Admin Dashboard</h1>
+        <div className="mobile-actions">
+          <button className="mobile-refresh" onClick={fetchStats} disabled={loading}>
+            <span>🔄</span>
+          </button>
+        </div>
+      </div>
+
       {/* Admin Header */}
-      <header className="admin-header">
+      <header className={`admin-header ${mobileMenuOpen ? 'hidden-mobile' : ''}`}>
         <div className="admin-header-left">
           <AdminIcon />
           <h1>Admin Dashboard</h1>
@@ -115,31 +334,47 @@ export default function Admin({ onLogout }) {
       </header>
 
       {/* Admin Navigation */}
-      <nav className="admin-nav">
+      <nav ref={navRef} className={`admin-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="mobile-nav-header">
+          <h2>Menu</h2>
+          <button className="close-mobile-menu" onClick={() => setMobileMenuOpen(false)}>×</button>
+        </div>
         <button 
           className={`admin-nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-          onClick={() => setActiveTab('dashboard')}
+          onClick={() => {
+            setActiveTab('dashboard')
+            setMobileMenuOpen(false)
+          }}
         >
           <DashboardIcon />
           <span>Dashboard</span>
         </button>
         <button 
           className={`admin-nav-item ${activeTab === 'users' ? 'active' : ''}`}
-          onClick={() => setActiveTab('users')}
+          onClick={() => {
+            setActiveTab('users')
+            setMobileMenuOpen(false)
+          }}
         >
           <AdminIcon />
           <span>Users</span>
         </button>
         <button 
           className={`admin-nav-item ${activeTab === 'history' ? 'active' : ''}`}
-          onClick={() => setActiveTab('history')}
+          onClick={() => {
+            setActiveTab('history')
+            setMobileMenuOpen(false)
+          }}
         >
           <HistoryIcon />
           <span>History</span>
         </button>
         <button 
           className={`admin-nav-item ${activeTab === 'security' ? 'active' : ''}`}
-          onClick={() => setActiveTab('security')}
+          onClick={() => {
+            setActiveTab('security')
+            setMobileMenuOpen(false)
+          }}
         >
           <ShieldIcon />
           <span>Security</span>
@@ -216,8 +451,82 @@ export default function Admin({ onLogout }) {
 
         {activeTab === 'history' && (
           <div className="history-content">
-            <h2>System History</h2>
-            <p>System history and logs will be displayed here.</p>
+            <h2>RedZone Review History</h2>
+            <div className="history-filters">
+              <button 
+                className={`btn ${historyFilter === 'all' ? 'btn-secondary' : 'btn-ghost'}`}
+                onClick={() => setHistoryFilter('all')}
+              >
+                All
+              </button>
+              <button 
+                className={`btn ${historyFilter === 'approved' ? 'btn-secondary' : 'btn-ghost'}`}
+                onClick={() => setHistoryFilter('approved')}
+              >
+                Approved
+              </button>
+              <button 
+                className={`btn ${historyFilter === 'rejected' ? 'btn-secondary' : 'btn-ghost'}`}
+                onClick={() => setHistoryFilter('rejected')}
+              >
+                Rejected
+              </button>
+            </div>
+            
+            <div className="history-list">
+              {loadingRedZones ? (
+                <p>Loading history...</p>
+              ) : (
+                <table className="history-table">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Location</th>
+                      <th>Severity</th>
+                      <th>Status</th>
+                      <th>Reviewed At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {redZones
+                      .filter(zone => {
+                        if (historyFilter === 'all') return zone.status === 'approved' || zone.status === 'rejected';
+                        if (historyFilter === 'approved') return zone.status === 'approved';
+                        if (historyFilter === 'rejected') return zone.status === 'rejected';
+                        return false;
+                      })
+                      .map((zone) => (
+                        <tr key={zone._id} className={`severity-${zone.severity}`}>
+                          <td>{zone.title}</td>
+                          <td>{zone.location}</td>
+                          <td>
+                            <span className={`severity-badge ${zone.severity}`}>
+                              {zone.severity.charAt(0).toUpperCase() + zone.severity.slice(1)}
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`status-badge ${zone.status}`}>
+                              {zone.status.charAt(0).toUpperCase() + zone.status.slice(1)}
+                            </span>
+                          </td>
+                          <td>{new Date(zone.reviewedAt || zone.updatedAt).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              )}
+              
+              {!loadingRedZones && redZones.filter(zone => {
+                if (historyFilter === 'all') return zone.status === 'approved' || zone.status === 'rejected';
+                if (historyFilter === 'approved') return zone.status === 'approved';
+                if (historyFilter === 'rejected') return zone.status === 'rejected';
+                return false;
+              }).length === 0 && (
+                <div className="empty-state">
+                  <p>No review history found.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -225,6 +534,127 @@ export default function Admin({ onLogout }) {
           <div className="security-content">
             <h2>Security Settings</h2>
             <p>Security configuration and monitoring will be available here.</p>
+          </div>
+        )}
+
+        {/* RedZones Management */}
+        {activeTab === 'users' && (
+          <div className="redzones-management">
+            <div className="redzones-grid">
+              {/* Manage RedZones Card */}
+              <div className="card manage-redzones-card">
+                <h2>Manage RedZones</h2>
+                <div className="redzones-list">
+                  {loadingRedZones ? (
+                    <p>Loading RedZones...</p>
+                  ) : redZones.filter(zone => zone.status === 'pending').length > 0 ? (
+                    <table className="redzones-table">
+                      <thead>
+                        <tr>
+                          <th>Title</th>
+                          <th>Location</th>
+                          <th>Severity</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {redZones
+                          .filter(zone => zone.status === 'pending')
+                          .map((zone) => (
+                            <tr key={zone._id} className={`severity-${zone.severity}`}>
+                              <td>{zone.title}</td>
+                              <td>{zone.location}</td>
+                              <td>
+                                <span className={`severity-badge ${zone.severity}`}>
+                                  {zone.severity.charAt(0).toUpperCase() + zone.severity.slice(1)}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`status-badge ${zone.status}`}>
+                                  {zone.status.charAt(0).toUpperCase() + zone.status.slice(1)}
+                                </span>
+                              </td>
+                              <td className="action-buttons">
+                                <button 
+                                  onClick={() => handleApproveRedZone(zone._id)}
+                                  className="approve-btn"
+                                  title="Approve"
+                                >
+                                  ✅
+                                </button>
+                                <button 
+                                  onClick={() => handleRejectRedZone(zone._id)}
+                                  className="reject-btn"
+                                  title="Reject"
+                                >
+                                  ❌
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p>No pending RedZones found.</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Add New RedZone Card */}
+              <div className="card add-redzone-card">
+                <h2>Add New RedZone</h2>
+                <form onSubmit={handleSubmitRedZone} className="redzone-form">
+                  <div className="form-group">
+                    <label htmlFor="title">Title</label>
+                    <input
+                      type="text"
+                      id="title"
+                      value={newRedZone.title}
+                      onChange={(e) => setNewRedZone({...newRedZone, title: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="description">Description</label>
+                    <textarea
+                      id="description"
+                      value={newRedZone.description}
+                      onChange={(e) => setNewRedZone({...newRedZone, description: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="location">Location</label>
+                    <input
+                      type="text"
+                      id="location"
+                      value={newRedZone.location}
+                      onChange={(e) => setNewRedZone({...newRedZone, location: e.target.value})}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="form-group">
+                    <label htmlFor="severity">Severity</label>
+                    <select
+                      id="severity"
+                      value={newRedZone.severity}
+                      onChange={(e) => setNewRedZone({...newRedZone, severity: e.target.value})}
+                      required
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                  
+                  <button type="submit" className="btn btn-primary">Create RedZone</button>
+                </form>
+              </div>
+            </div>
           </div>
         )}
       </main>

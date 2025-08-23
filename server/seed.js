@@ -25,6 +25,13 @@ const demoUsers = [
     isActive: true
   },
   {
+    name: 'Second Admin',
+    email: 'admin2@redzone.com',
+    password: 'admin456',
+    role: 'admin',
+    isActive: true
+  },
+  {
     name: 'Regular User',
     email: 'user@redzone.com',
     password: 'user123',

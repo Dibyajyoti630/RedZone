@@ -482,7 +482,7 @@ export default function Admin({ onLogout }) {
                     <tr>
                       <th>Title</th>
                       <th>Location</th>
-                      <th>Severity</th>
+                      <th>Level</th>
                       <th>Status</th>
                       <th>Reviewed At</th>
                     </tr>

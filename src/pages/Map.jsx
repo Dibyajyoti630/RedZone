@@ -907,56 +907,6 @@ function Map() {
                 </div>
               )}
             </div>
-
-            {/* Notifications Card */}
-            <div className="notifications-card">
-              <h3>Notifications</h3>
-              <div className="notifications-list">
-                {notifications.length > 0 ? (
-                  notifications.map(notification => (
-                    <div key={notification.id} className={`notification-item notification-${notification.type}`}>
-                      <div className="notification-content">
-                        <p>{notification.message}</p>
-                        <span className="notification-time">{formatTimestamp(notification.timestamp)}</span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="no-notifications">No new notifications</p>
-                )}
-              </div>
-            </div>
-
-            {/* History Card */}
-            <div className="history-card">
-              <h3>Recent RedZones</h3>
-              <div className="history-list">
-                {redZones.length > 0 ? (
-                  redZones.map(zone => (
-                    <div key={zone.id} className="history-item">
-                      <div className="history-header">
-                        <span className={`severity-badge severity-${zone.severity}`}>
-                          {zone.severity.toUpperCase()}
-                        </span>
-                        <span className="history-time">{formatTimestamp(zone.timestamp)}</span>
-                      </div>
-                      <h4>{zone.name}</h4>
-                      <p>{zone.description}</p>
-                      {userLocation && (
-                        <p><small>Distance: {calculateDistance(
-                          userLocation.lat, 
-                          userLocation.lng, 
-                          zone.position.lat, 
-                          zone.position.lng
-                        ).toFixed(2)} km away</small></p>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="no-history">No recent RedZones</p>
-                )}
-              </div>
-            </div>
           </div>
         </div>
 

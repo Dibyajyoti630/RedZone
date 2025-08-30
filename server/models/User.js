@@ -73,6 +73,11 @@ userSchema.index({ email: 1 })
 userSchema.index({ role: 1 })
 userSchema.index({ isActive: 1 })
 
+// Static method to find user by email
+userSchema.statics.findByEmail = function(email) {
+  return this.findOne({ email })
+}
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   // Only hash the password if it has been modified (or is new)

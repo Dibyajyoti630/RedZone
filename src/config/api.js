@@ -10,6 +10,11 @@ export const API_ENDPOINTS = {
   
   // Admin endpoints
   ADMIN_STATS: `${API_BASE_URL}/api/admin/stats`,
+  ADMIN_USER_CONTACTS: `${API_BASE_URL}/api/user-contacts`,
+  
+  // User endpoints
+  UPDATE_PROFILE: `${API_BASE_URL}/api/users/profile`,
+  UPDATE_NOTIFICATION_PREFS: `${API_BASE_URL}/api/users/notification-preferences`,
   
   // RedZone endpoints
   REDZONES_RECENT: `${API_BASE_URL}/api/redzones/recent`,
@@ -40,8 +45,9 @@ export const apiCall = async (endpoint, options = {}) => {
   })
 
   if (!response.ok) {
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`)
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || `API call failed: ${response.status} ${response.statusText}`)
   }
-
-  return response.json()
+  
+  return await response.json()
 }

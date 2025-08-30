@@ -38,9 +38,67 @@ function UserDashboard({ user, onLogout }) {
 
   // No longer needed as we'll use Link component directly
 
+  const [showNotifyForm, setShowNotifyForm] = useState(false)
+  const [notifyFormData, setNotifyFormData] = useState({
+    phone: '',
+    email: ''
+  })
+
   const handleNotifyMe = () => {
-    // This will be implemented later - for now just show an alert
-    alert('Notification settings will be implemented soon!')
+    setShowNotifyForm(true)
+  }
+
+  const handleNotifyFormSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      // Save to localStorage as backup
+      localStorage.setItem('notificationPreferences', JSON.stringify({
+        phone: notifyFormData.phone,
+        email: !!notifyFormData.email
+      }))
+      
+      const token = localStorage.getItem('token')
+      
+      // Send to new user-contacts endpoint
+      const response = await fetch('http://localhost:5002/api/user-contacts/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          phone: notifyFormData.phone,
+          email: notifyFormData.email || user.email
+        })
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Contact information saved:', result)
+        alert('Your contact information has been saved successfully!')
+        setShowNotifyForm(false)
+        // Reset form
+        setNotifyFormData({
+          phone: '',
+          email: ''
+        })
+      } else {
+        const errorData = await response.json()
+        console.error('Failed to save contact information:', errorData)
+        alert('Failed to save contact information. ' + (errorData.message || 'Please try again.'))
+      }
+    } catch (error) {
+      console.error('Error saving contact information:', error)
+      alert('An error occurred while saving your contact information.')
+    }
+  }
+
+  const handleNotifyFormChange = (e) => {
+    const { name, value } = e.target
+    setNotifyFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
   }
 
   return (
@@ -92,9 +150,50 @@ function UserDashboard({ user, onLogout }) {
           </div>
           <h3>NOTIFY ME</h3>
           <p>Configure your notification preferences</p>
-          <button onClick={handleNotifyMe} className="btn btn-primary">
-            Settings
-          </button>
+          {showNotifyForm ? (
+            <div className="notify-form-container">
+              <form onSubmit={handleNotifyFormSubmit} className="notify-form">
+                <div className="form-group">
+                  <label htmlFor="phone">Phone Number</label>
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    value={notifyFormData.phone} 
+                    onChange={handleNotifyFormChange} 
+                    placeholder="Enter your phone number"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email Address</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    value={notifyFormData.email} 
+                    onChange={handleNotifyFormChange} 
+                    placeholder="Enter your email address"
+                    required
+                  />
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary">Submit</button>
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => setShowNotifyForm(false)}
+                  >
+                    Back
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <button onClick={handleNotifyMe} className="btn btn-primary">
+              Notify
+            </button>
+          )}
         </div>
 
         <div className="action-card">

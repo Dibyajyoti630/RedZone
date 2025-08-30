@@ -5,6 +5,27 @@
   background-color: #f5f5f5;
   position: relative;
 }
+.contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* ensures equal spacing */
+}
+
+.contacts-table th,
+.contacts-table td {
+  padding: 12px 16px; /* equal gap inside cells */
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.contacts-table th {
+  background-color: #f5f5f500;
+  font-weight: 600;
+}
+
+.contacts-table td {
+  word-wrap: break-word; /* prevents overflow */
+}
 
 /* Mobile Header with Hamburger Menu */
 .mobile-header {

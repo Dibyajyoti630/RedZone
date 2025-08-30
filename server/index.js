@@ -6,6 +6,7 @@ import authRoutes from './routes/auth.js'
 import userRoutes from './routes/users.js'
 import adminRoutes from './routes/admin.js'
 import redzoneRoutes from './routes/redzones.js'
+import userContactRoutes from './routes/userContacts.js'
 import User from './models/User.js'
 
 // Load environment variables
@@ -87,6 +88,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/redzones', redzoneRoutes)
+app.use('/api/user-contacts', userContactRoutes)
 
 // Health check route
 app.get('/api/health', (req, res) => {

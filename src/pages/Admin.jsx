@@ -46,6 +46,79 @@ export default function Admin({ onLogout }) {
   const [error, setError] = useState(null)
   const [redZones, setRedZones] = useState([])
   const [loadingRedZones, setLoadingRedZones] = useState(false)
+  const [userContacts, setUserContacts] = useState([])
+  const [loadingContacts, setLoadingContacts] = useState(false)
+  
+  // Fetch user contacts for admin
+  const fetchUserContacts = async () => {
+    try {
+      setLoadingContacts(true)
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch(API_ENDPOINTS.ADMIN_USER_CONTACTS, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+
+      const data = await response.json()
+      setUserContacts(data.contacts || [])
+      setError(null)
+    } catch (err) {
+      console.error('Error fetching user contacts:', err.message || err)
+      setError(`Failed to load user contacts: ${err.message || 'Unknown error'}`)
+    } finally {
+      setLoadingContacts(false)
+    }
+  }
+  
+  // Handle contact deletion
+  const handleDeleteContact = async (contactId) => {
+    if (!confirm('Are you sure you want to delete this contact?')) {
+      return
+    }
+    
+    try {
+      const token = localStorage.getItem('token')
+      
+      if (!token) {
+        setError('No authentication token found')
+        return
+      }
+
+      const response = await fetch(`${API_ENDPOINTS.ADMIN_USER_CONTACTS}/${contactId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+
+      if (!response.ok) {
+        const errorBody = await response.text();
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`)
+      }
+      
+      // Remove the deleted contact from state
+      setUserContacts(userContacts.filter(contact => contact._id !== contactId))
+      alert('Contact deleted successfully')
+    } catch (err) {
+      console.error('Error deleting contact:', err.message || err)
+      alert('An error occurred while deleting the contact')
+    }
+  }
   const [newRedZone, setNewRedZone] = useState({
     title: '',
     description: '',
@@ -280,6 +353,7 @@ export default function Admin({ onLogout }) {
   useEffect(() => {
     fetchStats()
     fetchRedZones()
+    fetchUserContacts()
   }, [])
 
   const recentActivity = [
@@ -357,7 +431,7 @@ export default function Admin({ onLogout }) {
           }}
         >
           <AdminIcon />
-          <span>Users</span>
+          <span>Manage RedZones</span>
         </button>
         <button 
           className={`admin-nav-item ${activeTab === 'history' ? 'active' : ''}`}
@@ -377,7 +451,7 @@ export default function Admin({ onLogout }) {
           }}
         >
           <ShieldIcon />
-          <span>Security</span>
+          <span>Users</span>
         </button>
       </nav>
 
@@ -532,8 +606,55 @@ export default function Admin({ onLogout }) {
 
         {activeTab === 'security' && (
           <div className="security-content">
-            <h2>Security Settings</h2>
-            <p>Security configuration and monitoring will be available here.</p>
+            <h2>User Contacts</h2>
+            <div className="user-contacts-section">
+              {loadingContacts ? (
+                <p>Loading contacts...</p>
+              ) : userContacts.length > 0 ? (
+                <table className="contacts-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Date Added</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {userContacts.map((contact) => (
+                      <tr key={contact._id}>
+                        <td>{contact.name}</td>
+                        <td>{contact.email}</td>
+                        <td>{contact.phone}</td>
+                        <td>{new Date(contact.createdAt).toLocaleString()}</td>
+                        <td>
+                          <button 
+                            onClick={() => handleDeleteContact(contact._id)}
+                            className="delete-btn"
+                            title="Delete Contact"
+                          >
+                            🗑️ Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="empty-state">
+                  <p>No user contacts found. Users can add their contact information from the dashboard.</p>
+                </div>
+              )}
+              
+              <button 
+                onClick={fetchUserContacts} 
+                className="btn btn-secondary refresh-btn"
+                disabled={loadingContacts}
+              >
+                {loadingContacts ? 'Refreshing...' : '🔄 Refresh Contacts'}
+              </button>
+            </div>
           </div>
         )}
 

@@ -5,7 +5,7 @@ import DashboardIcon from '../components/icons/DashboardIcon.jsx'
 import HistoryIcon from '../components/icons/HistoryIcon.jsx'
 import BellIcon from '../components/icons/BellIcon.jsx'
 import ShieldIcon from '../components/icons/ShieldIcon.jsx'
-import { API_ENDPOINTS, apiCall } from '../config/api.js'
+import { API_ENDPOINTS, apiCall, API_BASE_URL } from '../config/api.js'
 import './Admin.css'
 
 export default function Admin({ onLogout }) {
@@ -735,6 +735,7 @@ export default function Admin({ onLogout }) {
                           <th>Location</th>
                           <th>Severity</th>
                           <th>Status</th>
+                          <th>Image</th>
                           <th>Actions</th>
                         </tr>
                       </thead>
@@ -754,6 +755,18 @@ export default function Admin({ onLogout }) {
                                 <span className={`status-badge ${zone.status}`}>
                                   {zone.status.charAt(0).toUpperCase() + zone.status.slice(1)}
                                 </span>
+                              </td>
+                              <td>
+                                {zone.imageUrl ? (
+                                  <img 
+                                    src={`${API_BASE_URL}${zone.imageUrl}`} 
+                                    alt="RedZone" 
+                                    className="redzone-thumbnail" 
+                                    onClick={() => window.open(`${API_BASE_URL}${zone.imageUrl}`, '_blank')}
+                                  />
+                                ) : (
+                                  <span className="no-image">No image</span>
+                                )}
                               </td>
                               <td className="action-buttons">
                                 <button 

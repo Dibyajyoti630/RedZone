@@ -1,6 +1,6 @@
 // API Configuration
 // Use the actual IP address instead of localhost for cross-device access
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://10.151.242.108:5002'
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://10.151.242.108:5004'
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -27,6 +27,8 @@ export const API_ENDPOINTS = {
   REDZONES_REJECT: (id) => `${API_BASE_URL}/api/redzones/${id}/reject`,
   REDZONES_SAFE_NOW: (id) => `${API_BASE_URL}/api/redzones/${id}/safe-now`,
   USER_CONTACT_REQUEST_REMOVAL: `${API_BASE_URL}/api/user-contacts/me/request-removal`,
+  USER_CONTACT_NOTIFY: `${API_BASE_URL}/api/user-contacts/notify`,
+  USER_CONTACT_ME: `${API_BASE_URL}/api/user-contacts/me`,
   
   // Health check
   HEALTH: `${API_BASE_URL}/api/health`

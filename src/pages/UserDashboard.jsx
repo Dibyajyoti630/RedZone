@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { API_ENDPOINTS, API_BASE_URL } from '../config/api.js'
 
 function UserDashboard({ user, onLogout }) {
   const [recentRedZones, setRecentRedZones] = useState([])
@@ -19,7 +20,7 @@ function UserDashboard({ user, onLogout }) {
     
     try {
       const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:5002/api/redzones/recent', {
+      const response = await fetch(API_ENDPOINTS.REDZONES_RECENT, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -52,7 +53,7 @@ function UserDashboard({ user, onLogout }) {
       setLoadingContact(true)
       const token = localStorage.getItem('token')
       
-      const response = await fetch('http://localhost:5002/api/user-contacts/me', {
+      const response = await fetch(API_ENDPOINTS.USER_CONTACT_ME, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -93,7 +94,7 @@ function UserDashboard({ user, onLogout }) {
     try {
       const token = localStorage.getItem('token')
       
-      const response = await fetch('http://localhost:5002/api/user-contacts/me', {
+      const response = await fetch(API_ENDPOINTS.USER_CONTACT_ME, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -129,7 +130,7 @@ function UserDashboard({ user, onLogout }) {
       const token = localStorage.getItem('token')
       
       // Send to new user-contacts endpoint
-      const response = await fetch('http://localhost:5002/api/user-contacts/notify', {
+      const response = await fetch(API_ENDPOINTS.USER_CONTACT_NOTIFY, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -249,7 +250,7 @@ function UserDashboard({ user, onLogout }) {
                   />
                 </div>
                 <div className="notify-actions">
-                  <button type="submit" className="btn btn-primary">Submit</button>
+                  <button type="submit" className="btn btn-primary">{contactExists ? 'Update' : 'Submit'}</button>
                   <button 
                     type="button" 
                     className="btn btn-secondary" 
@@ -330,6 +331,16 @@ function UserDashboard({ user, onLogout }) {
                 <div className="redzone-content">
                   <h4>{redZone.title}</h4>
                   <p>{redZone.description}</p>
+                  {redZone.imageUrl && (
+                    <div className="redzone-image" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                      <img 
+                        src={`${API_BASE_URL}${redZone.imageUrl}`} 
+                        alt="RedZone" 
+                        style={{ maxWidth: '100%', maxHeight: '150px', borderRadius: '4px', cursor: 'pointer' }}
+                        onClick={() => window.open(`${API_BASE_URL}${redZone.imageUrl}`, '_blank')}
+                      />
+                    </div>
+                  )}
                   <div className="redzone-meta">
                     <span className="location">{redZone.location}</span>
                     <span className="date">{new Date(redZone.createdAt).toLocaleDateString()}</span>

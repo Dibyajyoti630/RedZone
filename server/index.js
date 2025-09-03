@@ -27,7 +27,7 @@ if (fs.existsSync(envLocalPath)) {
 }
 
 const app = express()
-const PORT = process.env.PORT || 5002 // Using port 5002 as seen in previous runs
+const PORT = process.env.PORT || 5004 // Using port 5004 to avoid conflicts
 
 // Middleware
 // Configure CORS to allow requests from any origin
@@ -38,6 +38,9 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// Serve static files from uploads directory
+app.use('/server/uploads', express.static('server/uploads'))
 
 // Database connection 
 const connectDB = async () => {
@@ -105,7 +108,7 @@ const connectDB = async () => {
 // Connect to database
 connectDB()
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/admin', adminRoutes)

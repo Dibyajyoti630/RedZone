@@ -750,6 +750,25 @@
   resize: vertical;
 }
 
+/* RedZone Image Styles */
+.redzone-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.redzone-thumbnail:hover {
+  transform: scale(1.1);
+}
+
+.no-image {
+  color: var(--text-600);
+  font-size: 0.8rem;
+}
+
 /* Responsive styles */
 @media (max-width: 1024px) {
   .redzones-grid {

@@ -175,7 +175,8 @@ function Map() {
       position: { lat: 19.0769, lng: 83.7603 },
       severity: "high",
       description: "High crime area reported near market",
-      timestamp: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+      timestamp: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+      imageUrl: "/server/uploads/redzones/redzone-1756924678154-583233250.jpg"
     },
     {
       id: 2,
@@ -841,6 +842,16 @@ function Map() {
                             <h3>{zone.name}</h3>
                             <p><strong>Severity:</strong> {zone.severity.toUpperCase()}</p>
                             <p>{zone.description}</p>
+                            {zone.imageUrl && (
+                              <div className="redzone-image">
+                                <img 
+                                  src={`${import.meta.env.VITE_API_URL || 'http://10.151.242.108:5004'}${zone.imageUrl}`} 
+                                  alt="RedZone" 
+                                  style={{ maxWidth: '100%', marginTop: '8px', marginBottom: '8px', borderRadius: '4px' }}
+                                  onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'http://10.151.242.108:5004'}${zone.imageUrl}`, '_blank')}
+                                />
+                              </div>
+                            )}
                             <p><small>Reported: {formatTimestamp(zone.timestamp)}</small></p>
                             {userLocation && (
                               <p><small>Distance: {calculateDistance(

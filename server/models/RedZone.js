@@ -32,6 +32,10 @@ const redZoneSchema = new mongoose.Schema({
       default: null
     }
   },
+  imageUrl: {
+    type: String,
+    default: null
+  },
   severity: {
     type: String,
     enum: ['low', 'medium', 'high'],

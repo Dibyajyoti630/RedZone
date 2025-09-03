@@ -42,7 +42,9 @@ export default function NavBar({ isAuthenticated = false, isAdmin = false, onLog
 
         <nav id="nav-menu" className="nav-links nav-center">
           {isAuthenticated && (
-            <Link to="/dashboard"><DashboardIcon /> <span>Dashboard</span></Link>
+            <>
+              <Link to="/dashboard"><DashboardIcon /> <span>Dashboard</span></Link>
+            </>
           )}
           {isAdmin && (
             <Link to="/admin"><AdminIcon /> <span>Admin</span></Link>

@@ -14,10 +14,12 @@ function ReportRedZone() {
     coordinates: {
       lat: null,
       lng: null
-    }
+    },
+    image: null
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -25,6 +27,23 @@ function ReportRedZone() {
       ...formData,
       [name]: value
     })
+  }
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setFormData({
+        ...formData,
+        image: file
+      })
+      
+      // Create a preview URL for the image
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result)
+      }
+      reader.readAsDataURL(file)
+    }
   }
 
   // Try to get user's current location when component mounts
@@ -61,21 +80,33 @@ function ReportRedZone() {
         return
       }
 
-      // Prepare data for submission
-      const dataToSubmit = {...formData}
+      // Create FormData for multipart/form-data submission (for image upload)
+      const formDataToSubmit = new FormData()
       
-      // Only include coordinates if both lat and lng are available
-      if (!dataToSubmit.coordinates.lat || !dataToSubmit.coordinates.lng) {
-        delete dataToSubmit.coordinates
+      // Add all text fields
+      formDataToSubmit.append('title', formData.title)
+      formDataToSubmit.append('description', formData.description)
+      formDataToSubmit.append('location', formData.location)
+      formDataToSubmit.append('landmark', formData.landmark)
+      formDataToSubmit.append('severity', formData.severity)
+      
+      // Add coordinates if available
+      if (formData.coordinates.lat && formData.coordinates.lng) {
+        formDataToSubmit.append('coordinates', JSON.stringify(formData.coordinates))
+      }
+      
+      // Add image if available
+      if (formData.image) {
+        formDataToSubmit.append('image', formData.image)
       }
 
       const response = await fetch(API_ENDPOINTS.REDZONES_CREATE, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          // Don't set Content-Type here, it will be automatically set with the boundary parameter
         },
-        body: JSON.stringify(dataToSubmit)
+        body: formDataToSubmit
       })
 
       if (!response.ok) {
@@ -187,19 +218,50 @@ function ReportRedZone() {
           </form>
         </div>
 
-        <div className="map-card">
-          <div className="map-card-header">
-            <h2>Find on Map</h2>
-            <p>Locate and mark the exact position</p>
+        <div className="image-upload-card">
+          <div className="image-upload-header">
+            <h2>Upload Image</h2>
+            <p>Add a photo of the area to help identify the danger</p>
           </div>
-          <div className="map-placeholder">
-            <div className="map-icon">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-            </div>
-            {formData.coordinates.lat && formData.coordinates.lng ? (
+          <div className="image-upload-container">
+            {imagePreview ? (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+                <button 
+                  type="button" 
+                  className="remove-image-btn"
+                  onClick={() => {
+                    setImagePreview(null)
+                    setFormData({
+                      ...formData,
+                      image: null
+                    })
+                  }}
+                >
+                  Remove Image
+                </button>
+              </div>
+            ) : (
+              <div className="image-upload-placeholder">
+                <div className="upload-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+                    <path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="m21 15-5-5L5 21"/>
+                  </svg>
+                </div>
+                <p>Click to upload an image</p>
+                <input 
+                  type="file" 
+                  id="image" 
+                  name="image" 
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="file-input"
+                />
+              </div>
+            )}
+            {formData.coordinates.lat && formData.coordinates.lng && (
               <div className="location-info">
                 <p>Location detected:</p>
                 <p className="coordinates">
@@ -207,8 +269,6 @@ function ReportRedZone() {
                   Lng: {formData.coordinates.lng.toFixed(6)}
                 </p>
               </div>
-            ) : (
-              <p>Attempting to detect your location...</p>
             )}
           </div>
         </div>

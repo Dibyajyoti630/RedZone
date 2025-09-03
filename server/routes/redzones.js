@@ -1,9 +1,46 @@
 import express from 'express'
 import auth from '../middleware/auth.js'
+import multer from 'multer'
+import path from 'path'
+import fs from 'fs'
 import User from '../models/User.js'
 import RedZone from '../models/RedZone.js'
+import RedZoneImage from '../models/RedZoneImage.js'
 import UserContact from '../models/UserContact.js'
 import { sendRedZoneNotification, sendSMS, testTwilioAccount } from '../utils/twilio.js'
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = 'server/uploads/redzones'
+    // Create directory if it doesn't exist
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true })
+    }
+    cb(null, uploadDir)
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, 'redzone-' + uniqueSuffix + path.extname(file.originalname))
+  }
+})
+
+const fileFilter = (req, file, cb) => {
+  // Accept only image files
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true)
+  } else {
+    cb(new Error('Only image files are allowed!'), false)
+  }
+}
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+})
 
 const router = express.Router()
 
@@ -132,9 +169,19 @@ router.get('/recent', auth, async (req, res) => {
 })
 
 // POST /api/redzones - Create a new RedZone report
-router.post('/', auth, async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   try {
-    const { title, description, location, landmark, severity, coordinates, status } = req.body
+    const { title, description, location, landmark, severity, status } = req.body
+    
+    // Parse coordinates if they were sent as a string (from FormData)
+    let coordinates = null
+    if (req.body.coordinates) {
+      try {
+        coordinates = JSON.parse(req.body.coordinates)
+      } catch (e) {
+        console.error('Error parsing coordinates:', e)
+      }
+    }
 
     // Validate required fields
     if (!title || !description || !location || !severity) {
@@ -152,6 +199,9 @@ router.post('/', auth, async (req, res) => {
         message: 'Severity must be low, medium, or high'
       })
     }
+
+    // Get image URL if an image was uploaded
+    const imageUrl = req.file ? `/${req.file.path.replace(/\\/g, '/')}` : null
 
     // Create new RedZone document
     const newRedZone = new RedZone({
@@ -171,8 +221,27 @@ router.post('/', auth, async (req, res) => {
       newRedZone.reviewedAt = Date.now()
     }
 
+    // If an image was uploaded, add it to the RedZone document
+    if (imageUrl) {
+      newRedZone.imageUrl = imageUrl;
+    }
+    
     // Save to database
     await newRedZone.save()
+    
+    // If an image was uploaded, save it to the RedZoneImage collection
+    if (imageUrl) {
+      const newRedZoneImage = new RedZoneImage({
+        title: title,
+        location: location,
+        date: new Date(),
+        imageUrl: imageUrl,
+        redZoneId: newRedZone._id,
+        uploadedBy: req.user.id
+      })
+      
+      await newRedZoneImage.save()
+    }
 
     // If created by admin and approved, send SMS notifications
     if (req.user.role === 'admin' && newRedZone.status === 'approved') {

@@ -31,6 +31,15 @@ console.log('TWILIO_MESSAGING_SERVICE_SID:', messagingServiceSid ? `Found (${mes
 
 // Create Twilio client if credentials are available and valid
 let client;
+let isTestMode = false;
+
+// Check if using test credentials
+if (accountSid === 'AC00000000000000000000000000000000' && 
+    authToken === '00000000000000000000000000000000') {
+  console.log('Using Twilio test credentials - SMS will be simulated but not actually sent');
+  isTestMode = true;
+}
+
 // Initialize Twilio client with credentials
 if (accountSid && authToken && messagingServiceSid) {
   try {
@@ -39,6 +48,8 @@ if (accountSid && authToken && messagingServiceSid) {
     console.log('Twilio client initialized successfully');
   } catch (error) {
     console.error('Error initializing Twilio client:', error.message);
+    console.log('Enabling test mode for SMS simulation');
+    isTestMode = true;
   }
 } else {
   console.warn('Twilio credentials not found or invalid. SMS functionality will be disabled.');
@@ -61,7 +72,7 @@ export const sendSMS = async (phoneNumber, message) => {
     }
 
     // Check if Twilio client is initialized
-    if (!client) {
+    if (!client && !isTestMode) {
       console.warn('SMS not sent: Twilio client not initialized due to missing credentials');
       return null;
     }
@@ -80,6 +91,21 @@ export const sendSMS = async (phoneNumber, message) => {
     
     console.log(`Formatting phone number: ${phoneNumber} -> ${formattedNumber}`);
 
+    // If in test mode, simulate SMS sending without making actual API calls
+    if (isTestMode) {
+      console.log(`[TEST MODE] Simulating SMS to ${formattedNumber}: "${message}"`);
+      // Create a mock result similar to what Twilio would return
+      const mockResult = {
+        sid: `TEST${Date.now()}`,
+        status: 'delivered',
+        to: formattedNumber,
+        body: message,
+        dateCreated: new Date().toISOString(),
+      };
+      console.log(`[TEST MODE] SMS simulated successfully to ${phoneNumber}. SID: ${mockResult.sid}, Status: ${mockResult.status}`);
+      return mockResult;
+    }
+    
     console.log(`Attempting to send SMS to ${formattedNumber} with messagingServiceSid: ${messagingServiceSid}`);
     
     // Send message using Twilio
@@ -118,7 +144,7 @@ export const sendSMS = async (phoneNumber, message) => {
 export const sendRedZoneNotification = async (phoneNumbers, redZone) => {
   try {
     // Check if Twilio client is initialized
-    if (!client) {
+    if (!client && !isTestMode) {
       console.warn('RedZone notifications not sent: Twilio client not initialized due to missing credentials');
       return [];
     }

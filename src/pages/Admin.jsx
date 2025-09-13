@@ -249,7 +249,7 @@ export default function Admin({ onLogout }) {
       fetchRedZones()
 
       // Show success message
-      alert('RedZone approved successfully')
+      alert('RedZone approved successfully. SMS notifications will be sent to all registered users with valid phone numbers.')
     } catch (err) {
       console.error('Error approving RedZone:', err.message || err)
       setError(`Failed to approve RedZone: ${err.message || 'Unknown error'}`)
@@ -325,7 +325,7 @@ export default function Admin({ onLogout }) {
       fetchRedZones()
 
       // Show success message
-      alert('RedZone marked as safe successfully. SMS notifications have been sent to all users.')
+      alert('RedZone marked as safe successfully. SMS notifications will be sent to all registered users with valid phone numbers.')
     } catch (err) {
       console.error('Error marking RedZone as safe:', err.message || err)
       setError(`Failed to mark RedZone as safe: ${err.message || 'Unknown error'}`)
